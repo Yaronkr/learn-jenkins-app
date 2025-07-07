@@ -22,5 +22,14 @@ pipeline {
                 '''
             }
         }
+        stage ("test"){
+            steps{
+                sh '''
+                    cat public/index.html
+                    npm run test
+                    
+                ''' 
+            }
+        }
     }
 }

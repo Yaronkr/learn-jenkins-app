@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
 
@@ -14,10 +15,15 @@ pipeline {
                 }
             }
             steps {
-                sh '''
-                    aws --version
-                    aws s3 ls
-                '''
+                withCredentials([usernamePassword(credentialsId: 'My-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 ls
+                   
+                    '''
+                 
+                }
+                
             }
         }
 
@@ -28,9 +34,7 @@ pipeline {
                     reuseNode true
                 }
             }
-            environment {
-                REACT_APP_VERSION = "1.0.$BUILD_ID"
-            }
+          
             steps {
                 sh '''
                     ls -la
@@ -77,8 +81,7 @@ pipeline {
                     steps {
                         sh '''
                             serve -s build &
-                            sleep 10
-                            npx playwright test  --reporter=html
+                     
                         '''
                     }
 

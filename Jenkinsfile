@@ -16,6 +16,7 @@ pipeline {
             steps {
                 sh '''
                     aws --version
+                    aws s3 ls
                 '''
             }
         }
@@ -26,6 +27,9 @@ pipeline {
                     image 'node:18-alpine'
                     reuseNode true
                 }
+            }
+            environment {
+                REACT_APP_VERSION = "1.0.$BUILD_ID"
             }
             steps {
                 sh '''

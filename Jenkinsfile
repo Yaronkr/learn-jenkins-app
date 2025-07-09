@@ -2,23 +2,30 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        NETLIFY_SITE_ID = 'YOUR NETLIFY SITE ID'
         REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
 
     stages {
-        stage ('AWS'){
+
+        stage('AWS') {
             agent {
                 docker {
                     image 'amazon/aws-cli'
                     args "--entrypoint=''"
                 }
             }
+            environment {
+                AWS_S3_BUCKET = 'your-aws-bucket-name'
+            }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'My-aws', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    sh 'aws s3 ls'
+                withCredentials([usernamePassword(credentialsId: 'My-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        echo "Hello S3!" > index.html
+                        aws s3 cp index.html s3://$AWS_S3_BUCKET/index.html
+                    '''
                 }
-                    
             }
         }
 
@@ -29,7 +36,6 @@ pipeline {
                     reuseNode true
                 }
             }
-          
             steps {
                 sh '''
                     ls -la
@@ -76,7 +82,7 @@ pipeline {
                     steps {
                         sh '''
                             serve -s build &
-                     
+   
                         '''
                     }
 
@@ -128,7 +134,7 @@ pipeline {
             }
 
             environment {
-                CI_ENVIRONMENT_URL = 'YOUR NETLIFY URL'
+                CI_ENVIRONMENT_URL = 'YOUR NETLIFY SITE URL'
             }
 
             steps {
